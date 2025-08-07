@@ -61,10 +61,10 @@
     "kind": "plugin",
     "name": "jodit-editor",
     "displayName": "Jodit Editor",
-    "description": ""
+    "description": "A powerful rich text editor plugin for Strapi v5 using the Jodit Editor with advanced formatting capabilities and seamless integration with Strapi's media library."
   },
   "name": "strapi-plugin-jodit-editor",
-  "description": "",
+  "description": "A powerful rich text editor plugin for Strapi v5 using the Jodit Editor with advanced formatting capabilities and seamless integration with Strapi's media library.",
   "license": "MIT",
   "repository": {
     "type": "git",
