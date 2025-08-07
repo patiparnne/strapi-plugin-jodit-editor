@@ -1,0 +1,2 @@
+export const STRAPI_MEDIA_BUTTON_NAME = 'strapiMedia';
+export const DEFAULT_BUTTONS = `source, bold, italic, underline, strikethrough, superscript, subscript, eraser, font, fontsize, brush, paragraph, classSpan, |, ul, ol, indent, outdent, left, center, right, justify, |, link, unlink, ${STRAPI_MEDIA_BUTTON_NAME}, image, file, video, table, hr, symbols, lineHeight, |, copy, cut, paste, copyformat, selectall, undo, redo, fullsize, print, preview, find, spellcheck, about`;

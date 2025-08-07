@@ -1,0 +1,14 @@
+{
+  "jodit-editor.jodit.label": "Jodit Editor",
+  "jodit-editor.jodit.description": "Rich text editor powered by Jodit with advanced formatting options",
+  "jodit-editor.jodit.options.advanced.settings": "Editor Settings",
+  "jodit-editor.jodit.options.height.label": "Editor Height (px)",
+  "jodit-editor.jodit.options.height.description": "Set the height of the editor in pixels",
+  "jodit-editor.jodit.options.removeButtons.label": "Remove Buttons (comma-separated)",
+  "jodit-editor.jodit.options.removeButtons.description": "Specify which buttons to remove from the toolbar. Example: bold,italic,underline",
+  "jodit-editor.jodit.options.toolbar.label": "Show Toolbar",
+  "jodit-editor.jodit.options.toolbar.description": "Whether to show the editor toolbar",
+  "jodit-editor.jodit.options.readonly.label": "Read Only",
+  "jodit-editor.jodit.options.readonly.description": "Make the editor read-only",
+  "jodit-editor.plugin.name": "Jodit Editor"
+}
