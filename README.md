@@ -30,21 +30,43 @@ To build the plugin:
 npm install strapi-plugin-jodit-editor
 ```
 
-## Customize Locally
-
-Navigate to the `src/plugins` directory in your Strapi project.  
-**Note:** It is recommended to install the plugin via `node_modules` rather than referencing it with a "resolve" path directly in `config/plugins.ts`, because Strapi's Media Library does not work with local plugins.
-
+To enable the plugin, add the following configuration to your `config/plugins.ts` file:
 ```bash
-cd src/plugins/
-git clone https://github.com/patiparnne/strapi-plugin-jodit-editor.git
-cd strapi-plugin-jodit-editor
-npm install
-npm run build
-
-cd ../../../
-npm install src/plugins/strapi-plugin-jodit-editor
+export default ({ env }) => ({
+  ...,
+  'jodit-editor': {
+    enabled: true
+  }
+});
 ```
+
+## Custom Development Locally
+
+To develop or customize the plugin locally within your Strapi project, follow these steps:
+
+1. Clone the plugin repository into your `src/plugins` directory:
+  ```bash
+  cd src/plugins/
+  git clone https://github.com/patiparnne/strapi-plugin-jodit-editor.git
+  cd strapi-plugin-jodit-editor
+  npm install
+  npm run build
+  ```
+
+2. Reference the local plugin in your `config/plugins.ts` file:
+  ```typescript
+  export default ({ env }) => ({
+    ...,
+    'jodit-editor': {
+     enabled: true,
+     resolve: 'src/plugins/strapi-plugin-jodit-editor'
+    }
+  });
+  ```
+
+3. Restart your Strapi server to apply changes.
+
+**Note:** When using a local plugin, Strapi's Media Library integration may have limitations. For full compatibility, it is recommended to install the plugin via `node_modules` when deploying to production.
 
 ## Usage
 
