@@ -5,13 +5,22 @@ import React, {
   useCallback,
   memo,
 } from 'react';
+
 import styled from 'styled-components';
+
+import JoditEditor from 'jodit-react';
+
+import { DeepPartial, IJodit } from 'jodit/esm/types';
+import { Config } from 'jodit/esm/config';
+
 import { useIntl } from 'react-intl';
+
 import { Field } from '@strapi/design-system';
 import { Loader } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
+
 import { useFetchClient, useStrapiApp } from '@strapi/strapi/admin';
-import JoditEditor from 'jodit-react';
-import { IJodit } from 'jodit/esm/types';
+
 import { DEFAULT_BUTTONS, STRAPI_MEDIA_BUTTON_NAME } from './config';
 
 const cursorPlaceholder = `current_cursor_placeholder`;
@@ -75,20 +84,24 @@ const prefixFileUrlWithBackendUrl = (url: string) => {
 const generateMediaHtml = (file: { url: string; alt?: string; mime: string; name?: string }) => {
   const { url, alt = '', mime, name = 'media' } = file;
   if (mime.startsWith('image/')) {
-    return `<img src="${url}" alt="${alt || name}" />`;
+    return `
+<img src="${url}" alt="${alt || name}" />`;
   } else if (mime.startsWith('video/')) {
-    return `<video controls style="max-width: 100%;">
-      <source src="${url}" type="${mime}">
-      Your browser does not support the video tag.
-    </video>`;
+    return `
+<video controls style="max-width: 100%;">
+  <source src="${url}" type="${mime}">
+  Your browser does not support the video tag.
+</video>`;
   } else if (mime.startsWith('audio/')) {
-    return `<audio controls>
-      <source src="${url}" type="${mime}">
-      Your browser does not support the audio tag.
-    </audio>`;
+    return `
+<audio controls>
+  <source src="${url}" type="${mime}">
+  Your browser does not support the audio tag.
+</audio>`;
   } else {
     // For other file types, create a download link
-    return `<a href="${url}" download="${name}" target="_blank">${alt || name}</a>`;
+    return `
+<a href="${url}" download="${name}" target="_blank">${alt || name}</a>`;
   }
 };
 
@@ -123,12 +136,11 @@ const MediaLib = ({ isOpen = false, onChange = () => { }, onToggle = () => { } }
   onChange: (files: any[]) => void;
   onToggle: () => void;
 }) => {
-  console.log(useStrapiApp('ImageDialog', (state) => state));
-  const components = useStrapiApp('ImageDialog', (state) => state.components);
-  console.log(components);
-  const ImageDialog: any = components['media-library'];
-  console.log(ImageDialog);
-
+  // Get media library component directly as in the original code
+  const components = useStrapiApp('ImageDialog', (state: any) => state.components);
+  if (!components || !isOpen) return null;
+  // Make sure the component is defined before using it
+  const ImageDialog = components?.['media-library'] ?? null;
 
   const handleSelectAssets = (files: any[]) => {
     const formattedFiles = files.map(f => {
@@ -146,12 +158,15 @@ const MediaLib = ({ isOpen = false, onChange = () => { }, onToggle = () => { } }
     onChange(formattedFiles);
   };
 
-  if (!isOpen) {
+  if (!isOpen || !ImageDialog) {
     return null;
   }
 
+  // Use a type assertion to resolve the component properly
+  const ComponentToRender = (ImageDialog as any)?.default || ImageDialog;
+
   return (
-    <ImageDialog
+    <ComponentToRender
       onClose={onToggle}
       onSelectAssets={handleSelectAssets}
       allowedTypes={[
@@ -240,7 +255,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
 
-  const editorRef = useRef<IJodit>(null);
+  const editorRef = useRef<IJodit | null>(null);
 
   // Media library state (following CKEditor pattern)
   const [mediaLibVisible, setMediaLibVisible] = useState(false);
@@ -354,13 +369,13 @@ const JoditInput: React.FC<JoditInputProps> = ({
   }, [post]);
 
   // Jodit configuration
-  const config = useMemo<any>(() => ({
+  const config = useMemo<DeepPartial<Config>>(() => ({
     readonly: disabled || options.readonly || false,
     height: height,
     toolbar: showToolbar,
     placeholder: formatMessage({
       id: placeholder || 'jodit-editor.placeholder',
-      defaultMessage: 'Start typing...',
+      defaultMessage: intlLabel?.defaultMessage || 'Start typing here...',
     }),
     style: {
       fontFamily: 'Helvetica',
@@ -462,7 +477,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
     askBeforePasteHTML: false,
     askBeforePasteFromWord: false,
     cleanHTML: {
-      removeUnknownDOMElements: false,
+      disableCleanFilter: 'true',
     },
   }), [
     disabled,
@@ -490,7 +505,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
   const displayHint = hint;
 
   return (
-    <JoditContainer>
+    <DesignSystemProvider>
       <Field.Root
         name={name}
         id={name}
@@ -499,9 +514,10 @@ const JoditInput: React.FC<JoditInputProps> = ({
         hint={displayHint}
         style={{ position: 'relative' }}
       >
+
         <Field.Label>{displayLabel}</Field.Label>
 
-        <div style={{ position: 'relative' }}>
+        <JoditContainer>
           <JoditEditor
             value={initialValue}
             ref={editorRef}
@@ -520,16 +536,14 @@ const JoditInput: React.FC<JoditInputProps> = ({
               onChange({ target: { name, value: newContent.split(cursorPlaceholderContent).join('').trim() } });
             }}
           />
-        </div>
+        </JoditContainer>
 
         {
           displayDescription ? (
             <Field.Hint>{displayDescription}</Field.Hint>
           ) : null
         }
-
-        <Field.Hint />
-        <Field.Error />
+        {error ? <Field.Error>{error}</Field.Error> : null}
 
         {/* Media Library Modal */}
         <MediaLib
@@ -569,7 +583,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
             : null
         }
       </Field.Root>
-    </JoditContainer>
+    </DesignSystemProvider>
   );
 };
 

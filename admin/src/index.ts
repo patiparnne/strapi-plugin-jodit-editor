@@ -1,11 +1,23 @@
-import { getTranslation } from './utils/getTranslation';
 import { PLUGIN_ID } from './pluginId';
 import { Initializer, PluginIcon } from './components';
 import { DEFAULT_BUTTONS, STRAPI_MEDIA_BUTTON_NAME } from './components/config';
 
+// Import Jodit CSS
+import 'jodit/es2015/jodit.css';
+
 export default {
   register(app: any) {
     console.log('🎯 Jodit Editor plugin - ADMIN REGISTER function called!');
+    
+    // Inject global CSS to fix Jodit popup positioning
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `
+      .jodit .jodit-popup {
+        transform: none !important;
+      }
+    `;
+    document.head.appendChild(style);
     
     // Register the custom field for Jodit editor
     app.customFields.register({
@@ -142,12 +154,12 @@ export default {
     //   },
     // });
 
-    // app.registerPlugin({
-    //   id: PLUGIN_ID,
-    //   initializer: Initializer,
-    //   isReady: false,
-    //   name: PLUGIN_ID,
-    // });
+    app.registerPlugin({
+      id: PLUGIN_ID,
+      initializer: Initializer,
+      isReady: false,
+      name: PLUGIN_ID,
+    });
     
     console.log('🎯 Jodit Editor custom field registered successfully!');
   },
