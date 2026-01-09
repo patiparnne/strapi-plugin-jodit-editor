@@ -1,6 +1,16 @@
 {
-  "version": "1.1.0",
-  "keywords": [],
+  "version": "1.1.1",
+  "keywords": [
+    "strapi",
+    "strapi v5",
+    "strapi plugin",
+    "jodit",
+    "jodit editor",
+    "text editor",
+    "rich text editor",
+    "wysiwyg",
+    "content management"
+  ],
   "type": "commonjs",
   "exports": {
     "./package.json": "./package.json",
