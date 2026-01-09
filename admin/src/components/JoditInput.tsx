@@ -8,7 +8,10 @@ import React, {
 
 import styled from 'styled-components';
 
-import JoditEditor from 'jodit-react';
+import JoditEditorImport from 'jodit-react';
+
+// Handle ESM/CJS interop - jodit-react might export { default: Component } when bundled
+const JoditEditor = (JoditEditorImport as any).default || JoditEditorImport;
 
 import { DeepPartial, IJodit } from 'jodit/esm/types';
 import { Config } from 'jodit/esm/config';

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.13",
+  "version": "1.1.0",
   "keywords": [],
   "type": "commonjs",
   "exports": {
@@ -90,5 +90,7 @@
     "url": "https://github.com/patiparnne/strapi-plugin-jodit-editor/issues"
   },
   "homepage": "https://github.com/patiparnne/strapi-jodit#readme",
-  "author": "Patiparnne Vongchompue"
+  "author": "Patiparnne Vongchompue",
+  "buy_me_a_coffee": "https://buymeacoffee.com/patiparnne",
+  "patreon": "https://www.patreon.com/patiparnne"
 }

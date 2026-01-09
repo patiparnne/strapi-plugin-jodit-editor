@@ -34,7 +34,7 @@ export default {
         defaultMessage: 'Rich text editor powered by Jodit with advanced formatting options',
       },
       components: {
-        Input: async () => import('./components/JoditInput'),
+        Input: async () => import('./components/JoditInput').then((module) => ({ default: module.default })),
       },
       options: {
         advanced: [
