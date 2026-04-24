@@ -6,6 +6,8 @@ import React, {
   memo,
 } from 'react';
 
+import { useSelector } from "react-redux";
+
 import styled from 'styled-components';
 
 import JoditEditorImport from 'jodit-react';
@@ -266,6 +268,10 @@ const JoditInput: React.FC<JoditInputProps> = ({
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const currentTheme = useSelector(
+    (state) => state.admin_app?.theme?.currentTheme
+  );
+
   const toggleMediaLib = useCallback(() => {
     setMediaLibVisible(prev => !prev);
   }, []);
@@ -471,7 +477,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
     language: 'en',
 
     // Theme
-    theme: 'default',
+    theme: currentTheme ?? 'default',
 
     // Additional Strapi-specific settings
     beautifyHTML: true,
@@ -482,6 +488,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
       disableCleanFilter: 'true',
     },
   }), [
+    currentTheme,
     disabled,
     height,
     showToolbar,
