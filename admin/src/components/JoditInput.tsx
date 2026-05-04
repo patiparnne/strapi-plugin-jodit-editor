@@ -28,6 +28,18 @@ import { DEFAULT_BUTTONS, STRAPI_MEDIA_BUTTON_NAME } from './config';
 const cursorPlaceholder = `current_cursor_placeholder`;
 const cursorPlaceholderContent = `<${cursorPlaceholder}></${cursorPlaceholder}>`;
 
+const sanitizeEditorContent = (content: string = '') => (
+  content.split(cursorPlaceholderContent).join('').trim()
+);
+
+const saveWysiwygSelection = (jodit: IJodit | null) => {
+  // Source/code mode owns its cursor state. Saving Jodit's WYSIWYG selection
+  // there can corrupt the source editor after each keystroke.
+  if (jodit?.isEditorMode()) {
+    jodit.selection.save();
+  }
+};
+
 const JoditContainer = styled.div`
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
@@ -241,19 +253,6 @@ const JoditInput: React.FC<JoditInputProps> = ({
   metadatas,
 }) => {
 
-  const mediaLibButton = {
-    name: 'strapiMedia',
-    iconURL: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMycHgiIGhlaWdodD0iMzJweCIgZmlsbD0iIzIxMjEzNCI+PHBhdGggZD0iTTI3IDVIOWEyIDIgMCAwIDAtMiAydjJINWEyIDIgMCAwIDAtMiAydjE0YTIgMiAwIDAgMCAyIDJoMThhMiAyIDAgMCAwIDItMnYtMmgyYTIgMiAwIDAgMCAyLTJWN2EyIDIgMCAwIDAtMi0ybS01LjUgNGExLjUgMS41IDAgMSAxIDAgMyAxLjUgMS41IDAgMCAxIDAtM00yMyAyNUg1VjExaDJ2MTBhMiAyIDAgMCAwIDIgMmgxNHptNC00SDl2LTQuNWw0LjUtNC41IDYuMjA4IDYuMjA4YTEgMSAwIDAgMCAxLjQxMyAwTDI0LjMzIDE1IDI3IDE3LjY3MnoiPjwvcGF0aD48L3N2Zz4=',
-    tooltip: 'Strapi Media Library',
-    exec: function (jodit: IJodit) {
-      console.log(`📎 Jodit: Open Strapi media library`);
-      jodit.selection.insertHTML(cursorPlaceholderContent);
-      const newContent = jodit.value;
-      onChange({ target: { name, value: newContent.split(cursorPlaceholderContent).join('').trim() } });
-      toggleMediaLib();
-    }
-  }
-
   const { formatMessage } = useIntl();
   const { post } = useFetchClient();
 
@@ -269,6 +268,23 @@ const JoditInput: React.FC<JoditInputProps> = ({
   const toggleMediaLib = useCallback(() => {
     setMediaLibVisible(prev => !prev);
   }, []);
+
+  const emitContentChange = useCallback((content: string = '') => {
+    onChange({ target: { name, value: sanitizeEditorContent(content) } });
+  }, [name, onChange]);
+
+  const mediaLibButton = {
+    name: 'strapiMedia',
+    iconURL: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMycHgiIGhlaWdodD0iMzJweCIgZmlsbD0iIzIxMjEzNCI+PHBhdGggZD0iTTI3IDVIOWEyIDIgMCAwIDAtMiAydjJINWEyIDIgMCAwIDAtMiAydjE0YTIgMiAwIDAgMCAyIDJoMThhMiAyIDAgMCAwIDItMnYtMmgyYTIgMiAwIDAgMCAyLTJWN2EyIDIgMCAwIDAtMi0ybS01LjUgNGExLjUgMS41IDAgMSAxIDAgMyAxLjUgMS41IDAgMCAxIDAtM00yMyAyNUg1VjExaDJ2MTBhMiAyIDAgMCAwIDIgMmgxNHptNC00SDl2LTQuNWw0LjUtNC41IDYuMjA4IDYuMjA4YTEgMSAwIDAgMCAxLjQxMyAwTDI0LjMzIDE1IDI3IDE3LjY3MnoiPjwvcGF0aD48L3N2Zz4=',
+    tooltip: 'Strapi Media Library',
+    exec: function (jodit: IJodit) {
+      console.log(`📎 Jodit: Open Strapi media library`);
+      jodit.selection.insertHTML(cursorPlaceholderContent);
+      const newContent = jodit.value;
+      emitContentChange(newContent);
+      toggleMediaLib();
+    }
+  }
 
   // Utility function to convert File to media object with base64 data or upload to media library
   const fileToMediaObject = async (
@@ -431,7 +447,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
                 }
                 jodit?.selection.insertHTML(mediaHtml);
                 const newContent = jodit?.value || '';
-                onChange({ target: { name, value: newContent.split(cursorPlaceholderContent).join('').trim() } });
+                emitContentChange(newContent);
               }
               break;
             }
@@ -460,7 +476,7 @@ const JoditInput: React.FC<JoditInputProps> = ({
               }
               jodit?.selection.insertHTML(mediaHtml);
               const newContent = jodit?.value || '';
-              onChange({ target: { name, value: newContent.split(cursorPlaceholderContent).join('').trim() } });
+              emitContentChange(newContent);
             }
           }
         }
@@ -489,7 +505,8 @@ const JoditInput: React.FC<JoditInputProps> = ({
     placeholder,
     formatMessage,
     toggleMediaLib,
-    handleFileUpload
+    handleFileUpload,
+    emitContentChange
   ]);
 
   // Get the display label
@@ -527,14 +544,14 @@ const JoditInput: React.FC<JoditInputProps> = ({
           onBlur={(newContent: string) => {
             console.log('📎 Jodit: Content changed', newContent?.length || 0, 'characters');
             const jodit = editorRef.current;
-            jodit?.selection.save();
-            onChange({ target: { name, value: newContent.split(cursorPlaceholderContent).join('').trim() } });
+            saveWysiwygSelection(jodit);
+            emitContentChange(newContent);
           }}
           onChange={(newContent: string) => {
             console.log('📎 Jodit: Content changed', newContent?.length || 0, 'characters');
             const jodit = editorRef.current;
-            jodit?.selection.save();
-            onChange({ target: { name, value: newContent.split(cursorPlaceholderContent).join('').trim() } });
+            saveWysiwygSelection(jodit);
+            emitContentChange(newContent);
           }}
         />
       </JoditContainer>
